@@ -1,16 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Benford's Law Validation</title>
+    <title>Benford's Law Test</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <h1>Benford's Law Validation</h1>
-    <form method="POST" action="/" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv">
-        <input type="submit" value="Validate">
+    <h1>Benford's Law Test</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Submit">
     </form>
-    {% if plot_path %}
-        <img src="{{ plot_path }}" alt="Benford's Law Distribution">
+
+    {% if plot_data %}
+        <h2>Benford's Law Distribution</h2>
+        <div id="plot_div">{{ plot_data|safe }}</div>
     {% endif %}
+
+    <script>
+        // Custom styling for the plot_div container
+        document.getElementById('plot_div').style.width = '800px';
+        document.getElementById('plot_div').style.height = '500px';
+    </script>
 </body>
 </html>
+

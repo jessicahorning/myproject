@@ -1,13 +1,16 @@
-from flask import Flask, render_template, request
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
+import plotly.graph_objects as go
+import plotly.express as px
+from flask import Flask, render_template, request
+
 
 app = Flask(__name__)
 
 def benford_law_test(data):
     observed_counts = [0] * 9
     total_count = 0
+
     for value in data['7_2009']:
         if value != 0:
             first_digit = int(str(value)[0])
@@ -19,22 +22,16 @@ def benford_law_test(data):
     return observed_counts, expected_counts
 
 def plot_distribution(observed, expected):
-    digits = range(1, 10)
-    width = 0.35
+    digits = list(range(1, 10))
 
-    fig, ax = plt.subplots()
-    ax.bar(digits, observed, width, label='Observed')
-    ax.bar(digits, expected, width, label='Expected')
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=digits, y=observed, mode='lines+markers', name='Observed'))
+    fig.add_trace(go.Scatter(x=digits, y=expected, mode='lines+markers', name='Expected'))
 
-    ax.set_xlabel('Digits')
-    ax.set_ylabel('Counts')
-    ax.set_title('Benford\'s Law Distribution')
+    fig.update_layout(xaxis_title='Digits', yaxis_title='Counts', title="Benford's Law Distribution",
+                      template='plotly_white')
 
-    ax.legend()
-    plt.xticks(digits)
-    plt.grid(True)
-
-    return plt
+    return fig.to_html(full_html=False)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -43,14 +40,11 @@ def index():
         df = pd.read_csv(file)
 
         observed_counts, expected_counts = benford_law_test(df)
+        plot_data = plot_distribution(observed_counts, expected_counts)
 
-        plot = plot_distribution(observed_counts, expected_counts)
-        plot_path = 'static/plot.png'
-        plot.savefig(plot_path)
-
-        return render_template('index.html', plot_path=plot_path)
+        return render_template('index.html', plot_data=plot_data)
 
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', threaded=True)
